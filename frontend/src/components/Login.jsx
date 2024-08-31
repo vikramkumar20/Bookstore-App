@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import { toast } from 'react-hot-toast';
 
 function Login() {
     const {
@@ -9,7 +11,34 @@ function Login() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => console.log(data);
+    const onSubmit = async (data) => {
+        // console.log(data);
+        const userInfo={
+            email:data.email,
+            password: data.password
+        }
+          // calling the API using axios
+          await axios.post("http://localhost:4001/user/login",userInfo)
+          .then((resp)=>{
+            console.log(resp.data);
+            if(resp.data){
+              toast.success('Login successfull');
+              document.getElementById("my_modal_3").close();
+              setTimeout(()=>{
+                window.location.reload();
+                // storing the successfull signup data on local storage 
+               localStorage.setItem("Users",JSON.stringify(resp.data));
+              },1500); 
+            }
+          })
+          .catch((err)=>{
+            if(err.response){
+              console.log(err);
+              toast.error("Error:"+ err.response.data.message);
+              setTimeout(()=>{},1500);
+            }
+          })
+    }
     return (
         <>
             <div>
@@ -17,7 +46,9 @@ function Login() {
                     <div className="modal-box">
                         <form onSubmit={handleSubmit(onSubmit)} method="dialog">
                             {/* if there is a button in form, it will close the modal */}
-                            <Link to="/" className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                            <Link to="/" className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                            onClick={()=>document.getElementById("my_modal_3").close()}
+                            >
                                 ✕
                             </Link>
 
